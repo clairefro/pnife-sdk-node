@@ -1,0 +1,32 @@
+{
+  "name": "pnife-sdk",
+  "version": "1.0.0",
+  "description": "SDK for management pnife files and executing pnife tools",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "keywords": [
+    "ai",
+    "productivity"
+  ],
+  "author": "Claire Froelich",
+  "license": "ISC",
+  "scripts": {
+    "test": "jest",
+    "clean": "rm -rf dist",
+    "rollup-types": "node scripts/rollup-types.js",
+    "build": "npm run clean && tsc && npm run rollup-types",
+    "sb": "ts-node src/__sandbox__/sandbox.ts"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^22.5.5",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "short-uuid": "^5.2.0"
+  }
+}

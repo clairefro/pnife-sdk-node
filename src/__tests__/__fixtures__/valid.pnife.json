@@ -1,0 +1,20 @@
+{
+  "name": "myPnife",
+  "tools": [
+    {
+      "name": "simplify",
+      "description": "simplifies input text to one sentence",
+      "instructions": "simplify to a single sentence",
+      "input_type": "text",
+      "output_type": "text"
+    },
+    {
+      "name": "translate",
+      "description": "translates input text from a given source language to target language",
+      "instructions": "translate from {{sourceLang}} to {{targetLang}}",
+      "input_type": "text",
+      "output_type": "text",
+      "required_vars": ["sourceLang", "targetLang"]
+    }
+  ]
+}
