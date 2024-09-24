@@ -19,7 +19,7 @@ describe("Pnife class", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
       expect(pnife.tools()).toEqual(validPnifeFileContent.tools);
-      expect(pnife.name()).toEqual(validPnifeFileContent.name);
+      expect(pnife.name).toEqual(validPnifeFileContent.name);
     });
 
     // TODO: IT SHOULD THROW ERROR IF INVALID PNIFE FILE PATH

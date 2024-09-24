@@ -9,10 +9,10 @@ export class Pnife implements PnifeI {
   private fileManager: PnifeFileManager;
   private toolExecutor: PnifeToolExecutor;
 
-  private _name: string;
+  name: string;
 
   constructor(opts: PnifeOptions = {}) {
-    this._name = opts.name || generatePnifeName();
+    this.name = opts.name || generatePnifeName();
 
     // TODO: handle scenario where no knife file present - intialize empty pnife pbj
     this.fileManager = new PnifeFileManager(opts.pnifeFilePath);
@@ -20,7 +20,7 @@ export class Pnife implements PnifeI {
     // override deafults with pnife file data, if pnifeFilePath option is passed
     if (opts.pnifeFilePath) {
       const { name, tools } = this.load();
-      this._name = name;
+      this.name = name;
       this.toolManager = new PnifeToolManager(tools);
     } else {
       // Initialize tool manager with an empty array if no file is loaded
@@ -30,11 +30,7 @@ export class Pnife implements PnifeI {
     // TODO: MULTI-MODEL SUPPORT
     this.toolExecutor = new PnifeToolExecutor(opts.openAiApiKey || "");
 
-    this._name = opts.name || this._name || generatePnifeName();
-  }
-
-  name() {
-    return this._name;
+    this.name = opts.name || this.name || generatePnifeName();
   }
 
   // ==========================
@@ -112,7 +108,7 @@ export class Pnife implements PnifeI {
   //==================================
   export(): PnifeFileJson {
     return {
-      name: this._name,
+      name: this.name,
       tools: this.toolManager.tools(),
     };
   }
