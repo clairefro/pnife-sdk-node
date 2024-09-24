@@ -15,12 +15,11 @@ const validPnifeFileContent = JSON.parse(
 
 describe("Pnife class", () => {
   describe("loadTools()", () => {
-    it("should load tools from a valid pnife.json file", () => {
+    it("should load pnife from a valid pnife.json file", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      const tools = pnife.tools();
-
-      expect(tools).toEqual(validPnifeFileContent.tools);
+      expect(pnife.tools()).toEqual(validPnifeFileContent.tools);
+      expect(pnife.name()).toEqual(validPnifeFileContent.name);
     });
 
     // TODO: IT SHOULD THROW ERROR IF INVALID PNIFE FILE PATH

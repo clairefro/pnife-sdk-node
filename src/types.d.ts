@@ -12,7 +12,8 @@ interface Tool {
 
 interface PnifeI {
   pnifeFilePath: string;
-  name: string;
+
+  name(): string;
 
   addTool(tool: Tool): void;
   removeTool(toolName: string): void;
