@@ -3,27 +3,33 @@ export function validateTool(obj: any): void {
   const errors: string[] = [];
 
   if (typeof obj.name !== "string") {
-    errors.push("Property 'name' must be a string.");
+    errors.push("Tool property 'name' must be a string.");
   }
 
   if (typeof obj.instructions !== "string") {
-    errors.push("Property 'instructions' must be a string.");
+    errors.push(
+      `Tool '${obj.name}': Property 'instructions' must be a string.`
+    );
   }
 
   if (obj.required_vars !== undefined) {
     if (!Array.isArray(obj.required_vars)) {
-      errors.push("Property 'required_vars' must be an array.");
+      errors.push(
+        `Tool '${obj.name}': Property 'required_vars' must be an array.`
+      );
     } else if (
       !obj.required_vars.every((item: any) => typeof item === "string")
     ) {
-      errors.push("All elements in 'required_vars' must be strings.");
+      errors.push(
+        `Tool '${obj.name}': All elements in 'required_vars' must be strings.`
+      );
     }
   }
   if (errors.length) {
     throw new Error(
-      `Validation error: tool does not have required properties. ${errors.join(
-        "\n"
-      )}`
+      `Validation error: tool '${
+        obj.name
+      }' is not correctly formatted: ${errors.join("\n")}`
     );
   }
 

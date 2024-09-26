@@ -24,6 +24,10 @@ export class PnifeToolManager implements PnifeToolManagerI {
     return this._tools.find((tool) => tool.name === toolName);
   }
 
+  setTools(tools: Tool[]): void {
+    this._tools = tools;
+  }
+
   validateUniqueToolNames() {
     const toolNames = this._tools.map((tool) => tool.name);
     const duplicates = toolNames.filter(

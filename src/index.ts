@@ -16,21 +16,16 @@ export class Pnife implements PnifeI {
 
     // TODO: handle scenario where no knife file present - intialize empty pnife pbj
     this.fileManager = new PnifeFileManager(opts.pnifeFilePath);
-
-    // override deafults with pnife file data, if pnifeFilePath option is passed
-    if (opts.pnifeFilePath) {
-      const { name, tools } = this.load();
-      this.name = name;
-      this.toolManager = new PnifeToolManager(tools);
-    } else {
-      // Initialize tool manager with an empty array if no file is loaded
-      this.toolManager = new PnifeToolManager([]);
-    }
-
+    this.toolManager = new PnifeToolManager([]);
     // TODO: MULTI-MODEL SUPPORT
     this.toolExecutor = new PnifeToolExecutor(opts.openAiApiKey || "");
 
-    this.name = opts.name || this.name || generatePnifeName();
+    // override deafults with pnife file data, if pnifeFilePath option is passed
+    if (opts.pnifeFilePath) {
+      const { name, tools } = this.load(opts.pnifeFilePath);
+      this.name = name;
+      this.toolManager.setTools(tools);
+    }
   }
 
   // ==========================
@@ -58,7 +53,7 @@ export class Pnife implements PnifeI {
   //  --- TOOL EXECUTION ---
   // ==========================
 
-  // uninterpolated instructions of a tool
+  // uninterpolated
   getInstructionsRaw(toolName: string): string {
     const tool = this.getTool(toolName);
     return tool.instructions;
@@ -88,8 +83,15 @@ export class Pnife implements PnifeI {
     this.fileManager.setPnifeFilePath(newPath);
   }
 
-  load(): PnifeFileJson {
-    return this.fileManager.loadPnifeFile();
+  load(path?: string): PnifeFileJson {
+    const pnifeJson = this.read(path);
+    this.toolManager.setTools(pnifeJson.tools);
+    this.name = pnifeJson.name;
+    return pnifeJson;
+  }
+
+  read(path?: string): PnifeFileJson {
+    return this.fileManager.readPnifeFile(path);
   }
 
   // saves to this.pnifeFilePath
@@ -98,9 +100,9 @@ export class Pnife implements PnifeI {
     this.fileManager.savePnifeFile(pnifeData);
   }
 
-  saveAs(filePath: string) {
+  saveAs(path: string) {
     const pnifeData = this.export();
-    this.fileManager.savePnifeFileAs(pnifeData, filePath);
+    this.fileManager.savePnifeFileAs(pnifeData, path);
   }
 
   // =================================

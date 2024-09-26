@@ -4,6 +4,11 @@ interface PnifeOptions {
   name?: string;
 }
 
+interface PnifeFileJson {
+  name: string;
+  tools: Tool[];
+}
+
 interface Tool {
   name: string;
   instructions: string;
@@ -31,18 +36,40 @@ interface PnifeI {
 
   setPnifeFilePath(newPath: string): void;
   export(): PnifeFileJson;
-  load(): PnifeFileJson;
+  load(path?: string): PnifeFileJson;
+  read(path?: string): PnifeFileJson;
   save(): void;
-  saveAs(filePath: string): void;
+  saveAs(path: string): void;
 }
 
-interface PnifeFileJson {
-  name: string;
+interface PnifeToolManagerI {
   tools: Tool[];
+  addTool(tool: Tool): void;
+  removeTool(toolName: string): void;
+  getTool(toolName: string): Tool | undefined;
+  setTools(tools: Tool[]): void;
+
+  validateUniqueToolNames(): void;
 }
 
-interface PnifeToolManagerI {}
+interface PnifeToolExecutorI {
+  use(tool: Tool, input: string, vars: { [key: string]: string }): string;
+  interpolateInstructions(
+    instructions: string,
+    vars: { [key: string]: string }
+  ): string;
+}
 
+interface PnifeFileManagerI {
+  pnifeFilePath: string;
+
+  updatePnifeFilePath(newPath: string): void;
+  setPnifeFilePath(newPath: string): void;
+
+  readPnifeFile(path?: string): PnifeFileJson;
+  savePnifeFile(pnife: PnifeFileJson): void;
+  savePnifeFileAs(pnifeData: PnifeFileJson, filePath: string): void;
+}
 interface Model {}
 
 interface ModelAdapter {

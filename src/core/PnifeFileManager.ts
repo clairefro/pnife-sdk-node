@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
 
+import { validatePnife } from "../validators/validatePnife";
+
 import { DEFAULT_PNIFE_FILE_NAME } from "../constants";
 
-export class PnifeFileManager {
+export class PnifeFileManager implements PnifeFileManagerI {
   private _pnifeFilePath: string;
 
   constructor(pnifeFilePath?: string) {
@@ -23,13 +25,16 @@ export class PnifeFileManager {
     this._pnifeFilePath = newPath;
   }
 
-  loadPnifeFile(): PnifeFileJson {
+  readPnifeFile(path?: string): PnifeFileJson {
+    const resolvedPath = path || this._pnifeFilePath;
     try {
-      const data = fs.readFileSync(this._pnifeFilePath, "utf-8");
-      return JSON.parse(data);
+      const data = fs.readFileSync(resolvedPath, "utf-8");
+      const parsed = JSON.parse(data);
+      validatePnife(parsed);
+      return parsed;
     } catch (err: any) {
       throw new Error(
-        `Failed to load pnife file to ${this._pnifeFilePath}: ${err.message}`
+        `Failed to load pnife file to ${resolvedPath}: ${err.message}`
       );
     }
   }
