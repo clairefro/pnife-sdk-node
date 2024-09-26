@@ -14,11 +14,11 @@ interface PnifeI {
   pnifeFilePath: string;
 
   name: string;
+  tools: Tool[];
 
   addTool(tool: Tool): void;
   removeTool(toolName: string): void;
   getTool(toolName: string): Tool;
-  tools(): Tool[];
 
   getInstructionsRaw(toolName: string): string;
   getInstructions(toolName: string, vars?: { [key: string]: string }): string;
@@ -31,6 +31,7 @@ interface PnifeI {
 
   setPnifeFilePath(newPath: string): void;
   export(): PnifeFileJson;
+  load(): PnifeFileJson;
   save(): void;
   saveAs(filePath: string): void;
 }

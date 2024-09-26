@@ -18,7 +18,7 @@ describe("Pnife class", () => {
     it("should load pnife from a valid pnife.json file", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.tools()).toEqual(validPnifeFileContent.tools);
+      expect(pnife.tools).toEqual(validPnifeFileContent.tools);
       expect(pnife.name).toEqual(validPnifeFileContent.name);
     });
 

@@ -36,8 +36,8 @@ export class Pnife implements PnifeI {
   // ==========================
   // --- TOOL MANAGEMENT ---
   // ==========================
-  tools(): Tool[] {
-    return this.toolManager.tools();
+  get tools(): Tool[] {
+    return this.toolManager.tools;
   }
 
   addTool(tool: Tool) {
@@ -49,7 +49,7 @@ export class Pnife implements PnifeI {
   }
 
   getTool(toolName: string): Tool {
-    const tool = this.toolManager.tools().find((t) => t.name === toolName);
+    const tool = this.toolManager.tools.find((t) => t.name === toolName);
     if (!tool) throw new Error(`Tool '${toolName}' not found.`);
     return tool;
   }
@@ -109,7 +109,7 @@ export class Pnife implements PnifeI {
   export(): PnifeFileJson {
     return {
       name: this.name,
-      tools: this.toolManager.tools(),
+      tools: this.toolManager.tools,
     };
   }
 }

@@ -7,7 +7,7 @@ export class PnifeToolManager implements PnifeToolManagerI {
     this._tools = tools;
   }
 
-  tools(): Tool[] {
+  get tools(): Tool[] {
     return this._tools; // Always fetch from the tool manager
   }
 
