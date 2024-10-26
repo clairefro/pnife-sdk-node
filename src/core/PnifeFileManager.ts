@@ -25,22 +25,33 @@ export class PnifeFileManager implements PnifeFileManagerI {
     this._pnifeFilePath = newPath;
   }
 
+  get defaultPnifeFilePath(): string {
+    return path.join(process.cwd(), DEFAULT_PNIFE_FILE_NAME);
+  }
+
   readPnifeFile(path?: string): PnifeFileJson {
     const resolvedPath = path || this._pnifeFilePath;
+    let data;
     try {
-      const data = fs.readFileSync(resolvedPath, "utf-8");
+      data = fs.readFileSync(resolvedPath, "utf-8");
+    } catch (err: any) {
+      throw new Error(
+        `Failed to load pnife file path: ${resolvedPath}: ${err.message}`
+      );
+    }
+
+    try {
       const parsed = JSON.parse(data);
       validatePnife(parsed);
       return parsed;
     } catch (err: any) {
-      throw new Error(
-        `Failed to load pnife file to ${resolvedPath}: ${err.message}`
-      );
+      throw new Error(err.message);
     }
   }
 
   savePnifeFile(pnife: PnifeFileJson) {
     try {
+      // TODO: VALIDATE PNIFE FILE
       const data = JSON.stringify(pnife, null, 2);
       fs.writeFileSync(this._pnifeFilePath, data, "utf-8");
     } catch (err: any) {
@@ -48,13 +59,11 @@ export class PnifeFileManager implements PnifeFileManagerI {
     }
   }
 
-  savePnifeFileAs(pnifeData: PnifeFileJson, filePath: string) {
+  savePnifeFileAs(pnife: PnifeFileJson, path: string) {
     try {
-      fs.writeFileSync(filePath, JSON.stringify(pnifeData, null, 2));
+      fs.writeFileSync(path, JSON.stringify(pnife, null, 2));
     } catch (err: any) {
-      throw new Error(
-        `Failed to save pnife file as '${filePath}': ${err.message}`
-      );
+      throw new Error(`Failed to save pnife file as '${path}': ${err.message}`);
     }
   }
 }

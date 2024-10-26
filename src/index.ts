@@ -3,6 +3,7 @@ import { PnifeToolManager } from "./core/PnifeToolManager";
 import { PnifeToolExecutor } from "./core/PnifeToolExecutor";
 
 import { generatePnifeName } from "./util/generatePnifeName";
+import { validatePnife } from "./validators/validatePnife";
 
 export class Pnife implements PnifeI {
   private toolManager: PnifeToolManager;
