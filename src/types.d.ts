@@ -17,30 +17,25 @@ interface Tool {
 }
 
 interface PnifeI {
-  pnifeFilePath: string;
-
   name: string;
-  tools: Tool[];
+  tools: {
+    get: (toolName: string) => Tool;
+    add: (tool: Tool) => void;
+    remove: (toolName: string) => void;
+    list: () => Tool[];
+  };
 
-  addTool(tool: Tool): void;
-  removeTool(toolName: string): void;
-  getTool(toolName: string): Tool;
+  file: {
+    path: () => string;
+    setPath: (path: string) => void;
+    load: (path?: string) => PnifeFileJson;
+    save: () => void;
+    saveAs: (path: string) => void;
+  };
 
-  getInstructionsRaw(toolName: string): string;
-  getInstructions(toolName: string, vars?: { [key: string]: string }): string;
+  export: () => PnifeFileJson;
 
-  use(
-    toolName: string,
-    input: string,
-    vars?: Record<string, any>
-  ): Promise<string>;
-
-  setPnifeFilePath(newPath: string): void;
-  export(): PnifeFileJson;
-  load(path?: string): PnifeFileJson;
-  read(path?: string): PnifeFileJson;
-  save(): void;
-  saveAs(path: string): void;
+  use: (toolName: string, input: string, vars: {}) => Promise<string>;
 }
 
 interface PnifeToolManagerI {

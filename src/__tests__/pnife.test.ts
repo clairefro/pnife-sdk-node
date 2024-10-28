@@ -28,27 +28,27 @@ describe("Pnife class", () => {
       const pnife = new Pnife();
       const pattern = new RegExp(`^${DEFAULT_PNIFE_NAME}`);
       expect(pnife.name).toMatch(pattern);
-      expect(pnife.tools).toEqual([]);
+      expect(pnife.tools.list()).toEqual([]);
     });
 
     it("initializes with provided name and empty tools", () => {
       const NAME = "foo";
       const pnife = new Pnife({ name: NAME });
       expect(pnife.name).toEqual(NAME);
-      expect(pnife.tools).toEqual([]);
+      expect(pnife.tools.list()).toEqual([]);
     });
 
     it("initializes from file with tools if valid path is provided", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.tools).toEqual(validPnifeFileContent.tools);
+      expect(pnife.tools.list()).toEqual(validPnifeFileContent.tools);
       expect(pnife.name).toEqual(validPnifeFileContent.name);
     });
 
     it("initializes from file with no tools if valid path is provided", () => {
       const pnife = new Pnife({ pnifeFilePath: emptyToolsPnifeFilePath });
 
-      expect(pnife.tools).toEqual([]);
+      expect(pnife.tools.list()).toEqual([]);
     });
 
     it("throws an error if invalid pnifeFilePath provided", () => {
@@ -57,7 +57,7 @@ describe("Pnife class", () => {
   });
 
   // =============================================================================
-  describe("pnife file management", () => {
+  describe("pnife.file", () => {
     it("throws an error if the pnife.json file cannot be loaded", () => {
       const invalidFilePath = path.join(
         __dirname,
@@ -80,7 +80,7 @@ describe("Pnife class", () => {
 
     it("saves pnife to default path, with default name", () => {
       const pnife = new Pnife();
-      expect(() => pnife.save()).not.toThrow();
+      expect(() => pnife.file.save()).not.toThrow();
 
       const loadedPnife = JSON.parse(
         fs.readFileSync(DEFAULT_PNIFE_FILE_NAME, "utf-8")
@@ -89,20 +89,20 @@ describe("Pnife class", () => {
       expect(() => validatePnife(loadedPnife)).not.toThrow();
 
       // cleanup: delete pnife file
-      fs.unlinkSync(pnife.pnifeFilePath);
+      fs.unlinkSync(pnife.file.path());
     });
 
     it("saves pnife to provided path, if pnife file path configured", () => {
       const pnife = new Pnife();
 
-      pnife.setPnifeFilePath(tempPnifeFilePath);
+      pnife.file.setPath(tempPnifeFilePath);
 
-      expect(() => pnife.save()).not.toThrow();
+      expect(() => pnife.file.save()).not.toThrow();
 
       const loadedPnife = JSON.parse(
         fs.readFileSync(tempPnifeFilePath, "utf-8")
       );
-      expect(pnife.pnifeFilePath).toEqual(tempPnifeFilePath);
+      expect(pnife.file.path()).toEqual(tempPnifeFilePath);
       expect(() => validatePnife(loadedPnife)).not.toThrow();
       expect(loadedPnife.name).toMatch(DEFAULT_PNIFE_NAME);
 
@@ -110,10 +110,10 @@ describe("Pnife class", () => {
       fs.unlinkSync(tempPnifeFilePath);
     });
 
-    it("'saves as' to provided pnife file path", () => {
+    it("saveAs to provided pnife file path", () => {
       const pnife = new Pnife();
 
-      expect(() => pnife.saveAs(tempPnifeFilePath)).not.toThrow();
+      expect(() => pnife.file.saveAs(tempPnifeFilePath)).not.toThrow();
 
       const loadedPnife = JSON.parse(
         fs.readFileSync(tempPnifeFilePath, "utf-8")
@@ -125,14 +125,12 @@ describe("Pnife class", () => {
       fs.unlinkSync(tempPnifeFilePath);
     });
 
-    it("pnife.save() overrides existing pnife file", () => {
+    it("save() overrides existing pnife file", () => {
       const pnife = new Pnife();
 
-      pnife.save();
+      pnife.file.save();
 
-      let loadedPnife = JSON.parse(
-        fs.readFileSync(pnife.pnifeFilePath, "utf-8")
-      );
+      let loadedPnife = JSON.parse(fs.readFileSync(pnife.file.path(), "utf-8"));
       expect(loadedPnife.tools).toHaveLength(0);
 
       const tool = {
@@ -140,23 +138,23 @@ describe("Pnife class", () => {
         instructions: "do something",
       };
 
-      pnife.addTool(tool);
+      pnife.tools.add(tool);
 
-      pnife.save();
+      pnife.file.save();
 
-      loadedPnife = JSON.parse(fs.readFileSync(pnife.pnifeFilePath, "utf-8"));
+      loadedPnife = JSON.parse(fs.readFileSync(pnife.file.path(), "utf-8"));
       expect(loadedPnife.tools).toHaveLength(1);
       expect(loadedPnife.tools[0].name).toBe(tool.name);
       expect(loadedPnife.tools[0].instructions).toBe(tool.instructions);
 
       // cleanup: delete pnife file
-      fs.unlinkSync(pnife.pnifeFilePath);
+      fs.unlinkSync(pnife.file.path());
     });
 
-    it("pnife.saveAs() overrides existing pnife file", () => {
+    it("saveAs() overrides existing pnife file", () => {
       const pnife = new Pnife();
 
-      pnife.saveAs(tempPnifeFilePath);
+      pnife.file.saveAs(tempPnifeFilePath);
 
       let loadedPnife = JSON.parse(fs.readFileSync(tempPnifeFilePath, "utf-8"));
       expect(loadedPnife.tools).toHaveLength(0);
@@ -166,9 +164,9 @@ describe("Pnife class", () => {
         instructions: "do something",
       };
 
-      pnife.addTool(tool);
+      pnife.tools.add(tool);
 
-      pnife.saveAs(tempPnifeFilePath);
+      pnife.file.saveAs(tempPnifeFilePath);
 
       loadedPnife = JSON.parse(fs.readFileSync(tempPnifeFilePath, "utf-8"));
       expect(loadedPnife.tools).toHaveLength(1);
@@ -182,28 +180,30 @@ describe("Pnife class", () => {
 
   // =============================================================================
 
-  describe("tool management", () => {
+  describe("pnife.tools", () => {
     it("gets tools", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.tools).toEqual(validPnifeFileContent.tools);
+      expect(pnife.tools.list()).toEqual(validPnifeFileContent.tools);
     });
 
     it("gets a tool by name", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.getTool("simplify")).toEqual(validPnifeFileContent.tools[0]);
+      expect(pnife.tools.get("simplify")).toEqual(
+        validPnifeFileContent.tools[0]
+      );
     });
 
     it("throws error if no tool found with provided name ", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
-      expect(() => pnife.getTool("i-dont-exist")).toThrow();
+      expect(() => pnife.tools.get("i-dont-exist")).toThrow();
     });
 
     it("lets you add tools", () => {
       const pnife = new Pnife();
 
-      expect(pnife.tools).toHaveLength(0);
+      expect(pnife.tools.list()).toHaveLength(0);
 
       const TOOL1_NAME = "tool1";
       const tool1 = {
@@ -211,10 +211,10 @@ describe("Pnife class", () => {
         instructions: "this is tool 1",
       };
 
-      pnife.addTool(tool1);
+      pnife.tools.add(tool1);
 
-      expect(pnife.tools).toHaveLength(1);
-      expect(pnife.tools[0].name).toBe(TOOL1_NAME);
+      expect(pnife.tools.list()).toHaveLength(1);
+      expect(pnife.tools.list()[0].name).toBe(TOOL1_NAME);
 
       const TOOL2_NAME = "tool2";
       const tool2 = {
@@ -222,20 +222,20 @@ describe("Pnife class", () => {
         instructions: "this is tool 2",
       };
 
-      pnife.addTool(tool2);
+      pnife.tools.add(tool2);
 
-      expect(pnife.tools).toHaveLength(2);
-      expect(pnife.tools[1].name).toBe(TOOL2_NAME);
+      expect(pnife.tools.list()).toHaveLength(2);
+      expect(pnife.tools.list()[1].name).toBe(TOOL2_NAME);
     });
 
     it("removes tools", () => {
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.tools).toHaveLength(2);
+      expect(pnife.tools.list()).toHaveLength(2);
 
-      pnife.removeTool("simplify");
+      pnife.tools.remove("simplify");
 
-      expect(pnife.tools).toHaveLength(1);
+      expect(pnife.tools.list()).toHaveLength(1);
     });
 
     it("logs a warning if you try to remove tool that doesn't exist", () => {
@@ -243,9 +243,9 @@ describe("Pnife class", () => {
 
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
-      expect(pnife.tools).toHaveLength(2);
+      expect(pnife.tools.list()).toHaveLength(2);
 
-      expect(() => pnife.removeTool("foo")).not.toThrow();
+      expect(() => pnife.tools.remove("foo")).not.toThrow();
 
       expect(warnSpy).toHaveBeenCalled();
 
@@ -257,8 +257,11 @@ describe("Pnife class", () => {
 
       const invalidTool = { foo: "bar" } as any;
 
-      expect(() => pnife.addTool(invalidTool)).toThrow();
+      expect(() => pnife.tools.add(invalidTool)).toThrow();
     });
+
+    // TODO: CAN'T ADD TOOL WITH DUPLICATE NAME
+
     // TODO: TOOL EXECUTION (NO VARS)
 
     // TODO: TOOL EXECUTION: (WITH VARS)

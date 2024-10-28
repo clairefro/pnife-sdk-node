@@ -19,13 +19,15 @@ export class PnifeToolManager implements PnifeToolManagerI {
   removeTool(toolName: string) {
     const filtered = this._tools.filter((tool) => tool.name !== toolName);
     if (filtered.length === this._tools.length) {
-      console.warn(`no tool with name '${toolName}' found`);
+      console.warn(`No tool with name '${toolName}' found`);
     }
     this._tools = filtered;
   }
 
-  getTool(toolName: string): Tool | undefined {
-    return this._tools.find((tool) => tool.name === toolName);
+  getTool(toolName: string): Tool {
+    const tool = this._tools.find((t) => t.name === toolName);
+    if (!tool) throw new Error(`Tool '${toolName}' not found.`);
+    return tool;
   }
 
   setTools(tools: Tool[]): void {

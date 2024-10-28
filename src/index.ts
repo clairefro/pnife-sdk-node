@@ -1,4 +1,4 @@
-import { PnifeFileManager } from "./core/PnifeFileManager"; // New FileManager import
+import { PnifeFileManager } from "./core/PnifeFileManager"; // FileManager import
 import { PnifeToolManager } from "./core/PnifeToolManager";
 import { PnifeToolExecutor } from "./core/PnifeToolExecutor";
 
@@ -13,15 +13,12 @@ export class Pnife implements PnifeI {
 
   constructor(opts: PnifeOptions = {}) {
     this.name = opts.name || generatePnifeName();
-
     this.fileManager = new PnifeFileManager(opts.pnifeFilePath);
     this.toolManager = new PnifeToolManager([]);
-    // TODO: MULTI-MODEL SUPPORT
     this.toolExecutor = new PnifeToolExecutor(opts.openAiApiKey || "");
 
-    // override deafults with pnife file data, if pnifeFilePath option is passed
     if (opts.pnifeFilePath) {
-      const { name, tools } = this.load(opts.pnifeFilePath);
+      const { name, tools } = this.file.load(opts.pnifeFilePath);
       this.name = name;
       this.toolManager.setTools(tools);
     }
@@ -30,83 +27,51 @@ export class Pnife implements PnifeI {
   // ==========================
   // --- TOOL MANAGEMENT ---
   // ==========================
-  get tools(): Tool[] {
-    return this.toolManager.tools;
-  }
-
-  addTool(tool: Tool) {
-    this.toolManager.addTool(tool);
-  }
-
-  removeTool(toolName: string) {
-    this.toolManager.removeTool(toolName);
-  }
-
-  getTool(toolName: string): Tool {
-    const tool = this.toolManager.tools.find((t) => t.name === toolName);
-    if (!tool) throw new Error(`Tool '${toolName}' not found.`);
-    return tool;
+  get tools() {
+    return {
+      add: (tool: Tool) => this.toolManager.addTool(tool),
+      remove: (toolName: string) => this.toolManager.removeTool(toolName),
+      get: (toolName: string) => this.toolManager.getTool(toolName),
+      list: () => this.toolManager.tools,
+    };
   }
 
   // ==========================
-  //  --- TOOL EXECUTION ---
+  // --- TOOL EXECUTION ---
   // ==========================
-
-  // uninterpolated
-  getInstructionsRaw(toolName: string): string {
-    const tool = this.getTool(toolName);
-    return tool.instructions;
-  }
-
-  getInstructions(
-    toolName: string,
-    vars: { [key: string]: string } = {}
-  ): string {
-    const tool = this.getTool(toolName);
-    return this.toolExecutor.interpolateInstructions(tool.instructions, vars);
-  }
 
   async use(toolName: string, input: string, vars = {}) {
-    const tool = this.getTool(toolName);
-    return this.toolExecutor.use(tool, input, vars); // Delegate to the tool executor
+    const tool = this.tools.get(toolName) as Tool;
+    return this.toolExecutor.use(tool, input, vars);
   }
 
   // =================================
-  //  --- PNIFE FILE MANAGEMENT ---
+  // --- PNIFE FILE MANAGEMENT ---
   // =================================
-  get pnifeFilePath(): string {
-    return this.fileManager.pnifeFilePath;
+  get file() {
+    return {
+      path: () => this.fileManager.pnifeFilePath,
+      setPath: (newPath: string) => this.fileManager.setPnifeFilePath(newPath),
+      load: (path?: string) => {
+        const pnifeJson = this.fileManager.readPnifeFile(path);
+        this.toolManager.setTools(pnifeJson.tools);
+        this.name = pnifeJson.name;
+        return pnifeJson;
+      },
+      save: () => {
+        const pnifeData = this.export();
+        this.fileManager.savePnifeFile(pnifeData);
+      },
+      saveAs: (path: string) => {
+        const pnifeData = this.export();
+        this.fileManager.savePnifeFileAs(pnifeData, path);
+      },
+    };
   }
 
-  setPnifeFilePath(newPath: string) {
-    this.fileManager.setPnifeFilePath(newPath);
-  }
-
-  load(path?: string): PnifeFileJson {
-    const pnifeJson = this.read(path);
-    this.toolManager.setTools(pnifeJson.tools);
-    this.name = pnifeJson.name;
-    return pnifeJson;
-  }
-
-  read(path?: string): PnifeFileJson {
-    return this.fileManager.readPnifeFile(path);
-  }
-
-  // saves to this.pnifeFilePath
-  save() {
-    const pnifeData = this.export();
-    this.fileManager.savePnifeFile(pnifeData);
-  }
-
-  saveAs(path: string) {
-    const pnifeData = this.export();
-    this.fileManager.savePnifeFileAs(pnifeData, path);
-  }
-
-  // =================================
-  // -- OTHER ---
-  //==================================
+  // ==========================
+  // --- OTHER  ---
+  // ==========================
   export(): PnifeFileJson {
     return {
       name: this.name,
