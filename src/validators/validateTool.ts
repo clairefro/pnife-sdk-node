@@ -25,6 +25,15 @@ export function validateTool(obj: any): void {
       );
     }
   }
+
+  if (obj.description !== undefined) {
+    if (typeof obj.description !== "string") {
+      errors.push(
+        `Tool '${obj.name}': Property 'description' must be a string.`
+      );
+    }
+  }
+
   if (errors.length) {
     throw new Error(
       `Validation error: tool '${

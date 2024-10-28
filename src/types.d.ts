@@ -12,6 +12,7 @@ interface PnifeFileJson {
 interface Tool {
   name: string;
   instructions: string;
+  description?: string;
   required_vars?: string[];
 }
 
