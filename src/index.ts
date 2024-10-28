@@ -3,7 +3,6 @@ import { PnifeToolManager } from "./core/PnifeToolManager";
 import { PnifeToolExecutor } from "./core/PnifeToolExecutor";
 
 import { generatePnifeName } from "./util/generatePnifeName";
-import { validatePnife } from "./validators/validatePnife";
 
 export class Pnife implements PnifeI {
   private toolManager: PnifeToolManager;
@@ -15,7 +14,6 @@ export class Pnife implements PnifeI {
   constructor(opts: PnifeOptions = {}) {
     this.name = opts.name || generatePnifeName();
 
-    // TODO: handle scenario where no knife file present - intialize empty pnife pbj
     this.fileManager = new PnifeFileManager(opts.pnifeFilePath);
     this.toolManager = new PnifeToolManager([]);
     // TODO: MULTI-MODEL SUPPORT
