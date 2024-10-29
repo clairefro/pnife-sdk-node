@@ -35,8 +35,7 @@ export class Pnife implements PnifeI {
 
     if (opts.pnifeFilePath) {
       const { name, tools } = this.file.load(opts.pnifeFilePath);
-      this.name = name;
-      this.toolManager.setTools(tools);
+      this.import({ name, tools });
     }
   }
 
@@ -127,5 +126,11 @@ export class Pnife implements PnifeI {
       name: this.name,
       tools: this.toolManager.tools,
     };
+  }
+
+  import(pnifeJson: PnifeFileJson): void {
+    const { name, tools } = pnifeJson;
+    this.name = name;
+    this.toolManager.setTools(tools);
   }
 }

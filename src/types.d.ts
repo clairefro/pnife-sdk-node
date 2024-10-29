@@ -44,6 +44,7 @@ export interface PnifeI {
   };
 
   export: () => PnifeFileJson;
+  import: (pnifeJson: PnifeFileJson) => void;
 
   use: (toolName: string, input: string, vars: {}) => Promise<ToolOutput>;
 }
