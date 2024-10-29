@@ -1,22 +1,22 @@
-interface PnifeOptions {
+export interface PnifeOptions {
   openAiApiKey?: string;
   pnifeFilePath?: string;
   name?: string;
 }
 
-interface PnifeFileJson {
+export interface PnifeFileJson {
   name: string;
   tools: Tool[];
 }
 
-interface Tool {
+export interface Tool {
   name: string;
   instructions: string;
   description?: string;
   required_vars?: string[];
 }
 
-interface PnifeI {
+export interface PnifeI {
   name: string;
   tools: {
     get: (toolName: string) => Tool;
@@ -33,42 +33,28 @@ interface PnifeI {
     saveAs: (path: string) => void;
   };
 
+  models: {
+    add: (model: Model) => void;
+    remove: (platform: string, modelName: string) => void;
+    get: (platform: string, modelName: string) => Model;
+    getActive: (platform: string, modelName: string) => Model | undefined;
+    update: (platform: string, modelName: string, updated: {}) => void;
+    setActive: (platform: string, modelName: string) => void;
+    list: () => Model[];
+  };
+
   export: () => PnifeFileJson;
 
-  use: (toolName: string, input: string, vars: {}) => Promise<string>;
+  use: (toolName: string, input: string, vars: {}) => Promise<ToolOutput>;
 }
 
-interface PnifeToolManagerI {
-  tools: Tool[];
-  addTool(tool: Tool): void;
-  removeTool(toolName: string): void;
-  getTool(toolName: string): Tool | undefined;
-  setTools(tools: Tool[]): void;
-
-  validateUniqueToolNames(): void;
+export interface Model {
+  platform: string;
+  name: string;
+  apiKey?: string;
 }
 
-interface PnifeToolExecutorI {
-  use(tool: Tool, input: string, vars: { [key: string]: string }): string;
-  interpolateInstructions(
-    instructions: string,
-    vars: { [key: string]: string }
-  ): string;
-}
-
-interface PnifeFileManagerI {
-  pnifeFilePath: string;
-
-  updatePnifeFilePath(newPath: string): void;
-  setPnifeFilePath(newPath: string): void;
-
-  readPnifeFile(path?: string): PnifeFileJson;
-  savePnifeFile(pnife: PnifeFileJson): void;
-  savePnifeFileAs(pnifeData: PnifeFileJson, filePath: string): void;
-}
-interface Model {}
-
-interface ModelAdapter {
+export interface ModelAdapter {
   callModel(
     instructions: string,
     input: string,
@@ -76,9 +62,9 @@ interface ModelAdapter {
   ): Promise<string>;
 }
 
-// shim third party libs without types
+export interface ModelManagerI {}
 
-declare module "short-uuid" {
-  const value: any;
-  export default value;
+export interface ToolOutput {
+  output: string;
+  meta?: any;
 }

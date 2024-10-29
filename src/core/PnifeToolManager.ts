@@ -1,6 +1,7 @@
 import { validateTool } from "../validators/validateTool";
 
-export class PnifeToolManager implements PnifeToolManagerI {
+import { Tool } from "../types";
+export class PnifeToolManager {
   private _tools: Tool[] = [];
 
   constructor(tools: Tool[]) {
@@ -19,7 +20,7 @@ export class PnifeToolManager implements PnifeToolManagerI {
   removeTool(toolName: string) {
     const filtered = this._tools.filter((tool) => tool.name !== toolName);
     if (filtered.length === this._tools.length) {
-      console.warn(`No tool with name '${toolName}' found`);
+      throw new Error(`No tool with name '${toolName}' found`);
     }
     this._tools = filtered;
   }
@@ -41,6 +42,30 @@ export class PnifeToolManager implements PnifeToolManagerI {
     );
     if (duplicates.length > 0) {
       throw new Error(`Duplicate tool names found: ${duplicates.join(", ")}`);
+    }
+  }
+
+  interpolateInstructions(
+    instructions: string,
+    vars: { [key: string]: string }
+  ) {
+    return instructions.replace(/\{\{(.*?)\}\}/g, (_, key) => {
+      if (!(key in vars)) throw new Error(`Missing required variable: ${key}`);
+      return vars[key];
+    });
+  }
+
+  validateRequiredVars(reqVars: string[], providedVars: {}) {
+    let missing: string[] = [];
+
+    reqVars.forEach((rVar) => {
+      if (!(rVar in providedVars)) {
+        missing.push(rVar);
+      }
+    });
+
+    if (missing.length) {
+      throw new Error(`Missing required variables: ${missing.join(", ")}`);
     }
   }
 }

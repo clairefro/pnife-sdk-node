@@ -5,7 +5,9 @@ import { validatePnife } from "../validators/validatePnife";
 
 import { DEFAULT_PNIFE_FILE_NAME } from "../constants";
 
-export class PnifeFileManager implements PnifeFileManagerI {
+import { PnifeFileJson } from "../types";
+
+export class PnifeFileManager {
   private _pnifeFilePath: string;
 
   constructor(pnifeFilePath?: string) {

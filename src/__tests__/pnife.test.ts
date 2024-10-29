@@ -239,17 +239,11 @@ describe("Pnife class", () => {
     });
 
     it("logs a warning if you try to remove tool that doesn't exist", () => {
-      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
-
       const pnife = new Pnife({ pnifeFilePath: validPnifeFilePath });
 
       expect(pnife.tools.list()).toHaveLength(2);
 
-      expect(() => pnife.tools.remove("foo")).not.toThrow();
-
-      expect(warnSpy).toHaveBeenCalled();
-
-      warnSpy.mockRestore();
+      expect(() => pnife.tools.remove("foo")).toThrow();
     });
 
     it("throws error if you add an invalid tool", () => {

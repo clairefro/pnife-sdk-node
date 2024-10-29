@@ -1,21 +1,37 @@
-import { PnifeFileManager } from "./core/PnifeFileManager"; // FileManager import
+// Modules
+import { PnifeFileManager } from "./core/PnifeFileManager";
 import { PnifeToolManager } from "./core/PnifeToolManager";
-import { PnifeToolExecutor } from "./core/PnifeToolExecutor";
+import { PnifeModelManager } from "./core/PnifeModelManager";
+import { PnifeToolRunner } from "./core/PnifeToolRunner";
 
+// Utils
 import { generatePnifeName } from "./util/generatePnifeName";
+
+// Types
+import {
+  PnifeI,
+  PnifeOptions,
+  ToolOutput,
+  Model,
+  Tool,
+  PnifeFileJson,
+} from "./types";
 
 export class Pnife implements PnifeI {
   private toolManager: PnifeToolManager;
   private fileManager: PnifeFileManager;
-  private toolExecutor: PnifeToolExecutor;
+  private modelManager: PnifeModelManager;
+  private toolRunner: PnifeToolRunner;
 
   name: string;
 
   constructor(opts: PnifeOptions = {}) {
     this.name = opts.name || generatePnifeName();
+
     this.fileManager = new PnifeFileManager(opts.pnifeFilePath);
     this.toolManager = new PnifeToolManager([]);
-    this.toolExecutor = new PnifeToolExecutor(opts.openAiApiKey || "");
+    this.modelManager = new PnifeModelManager();
+    this.toolRunner = new PnifeToolRunner(this.modelManager, this.toolManager);
 
     if (opts.pnifeFilePath) {
       const { name, tools } = this.file.load(opts.pnifeFilePath);
@@ -40,9 +56,13 @@ export class Pnife implements PnifeI {
   // --- TOOL EXECUTION ---
   // ==========================
 
-  async use(toolName: string, input: string, vars = {}) {
-    const tool = this.tools.get(toolName) as Tool;
-    return this.toolExecutor.use(tool, input, vars);
+  async use(toolName: string, input: string, vars = {}): Promise<ToolOutput> {
+    return this.toolRunner.use(toolName, input, vars);
+  }
+
+  interpolateInstructions(toolName: string, vars: {}) {
+    const tool = this.toolManager.getTool(toolName);
+    return this.toolRunner.interpolateInstructions(tool, vars);
   }
 
   // =================================
@@ -65,6 +85,36 @@ export class Pnife implements PnifeI {
       saveAs: (path: string) => {
         const pnifeData = this.export();
         this.fileManager.savePnifeFileAs(pnifeData, path);
+      },
+    };
+  }
+
+  // ==========================
+  // --- MODELS  ---
+  // ==========================
+
+  get models() {
+    return {
+      add: (model: Model): void => {
+        this.modelManager.addModel(model);
+      },
+      remove: (platform: string, modelName: string): void => {
+        this.modelManager.removeModel(platform, modelName);
+      },
+      get: (platform: string, modelName: string): Model => {
+        return this.modelManager.getModel(platform, modelName);
+      },
+      update: (platform: string, modelName: string, updated = {}): void => {
+        this.modelManager.updateModel(platform, modelName, updated);
+      },
+      getActive: (): Model | undefined => {
+        return this.modelManager.getActiveModel();
+      },
+      setActive: (platform: string, modelName: string): void => {
+        this.modelManager.setActiveModel(platform, modelName);
+      },
+      list: () => {
+        return this.modelManager.listModels();
       },
     };
   }
